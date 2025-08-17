@@ -1,0 +1,45 @@
+﻿@using BlazorApp.UI.Models
+
+@if (Visible)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+
+                    <p>Are you sure you want to delete the @(Model is OperationTypeModel ? " Operation Type" : " Operation")?</p>
+                    <p class="text-danger">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDeleteModal">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDelete" disabled="@IsDeleting">
+                        @if (IsDeleting)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span>Deleting...</span>
+                        }
+                        else
+                        {
+                            <span>Delete</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    [Parameter] public bool Visible { get; set; } = false;
+    [Parameter] public bool IsDeleting { get; set; }
+    [Parameter] public object? Model { get; set; }
+    [Parameter] public EventCallback CloseDeleteModal { get; set; }
+    [Parameter] public EventCallback ConfirmDelete { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

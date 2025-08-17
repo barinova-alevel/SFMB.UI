@@ -1,0 +1,28 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <a href="/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4 pb-5">
+            @Body
+        </article>
+    </main>
+</div>
+<footer class="custom-footer">
+    <div class="text-muted small text-start">
+        <p> © 2025 Self Finance Manager Blazor. Powered by Blazor and .NET Core</p>
+    </div>
+</footer>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>

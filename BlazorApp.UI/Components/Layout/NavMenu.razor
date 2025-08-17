@@ -1,0 +1,54 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="" style="font-size: 1rem;">Self Finance Manager Blazor</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> SFMB
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="operations">
+                <span class="iwt">
+                    <i class="bi bi-cash-stack" aria-hidden="true"></i>
+                    <span>Operations</span>
+                </span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="operation-types">
+                <span class="iwt">
+                    <i class="bi bi-tags" aria-hidden="true"></i>
+                    <span>Operation Types</span>
+                </span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="daily-report">
+                <span class="iwt">
+                    <i class="bi bi-calendar-range" aria-hidden="true"></i>
+                    <span>Daily Report</span>
+                </span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="period-report">
+                <span class="iwt">
+                    <i class="bi bi-calendar-range" aria-hidden="true"></i>
+                    <span>Period Report</span>
+                </span>
+            </NavLink>
+        </div>
+    </nav>
+</div>
+

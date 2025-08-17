@@ -1,0 +1,112 @@
+﻿@using BlazorApp.UI.Models
+
+@if (Visible)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        @(IsEditing ? "Edit" : "Create")
+                        @(Model is OperationTypeModel ? " Operation Type" : " Operation")
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="OnClose"></button>
+                </div>
+                <EditForm Model="Model" OnValidSubmit="@OnValidSubmit">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body">
+                        @if (Model is OperationTypeModel typeModel)
+                        {
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name *</label>
+                                <InputText id="name" class="form-control" @bind-Value="typeModel.Name" />
+                                <ValidationMessage For="@(() => typeModel.Name)" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <InputTextArea id="description" class="form-control" rows="3" @bind-Value="typeModel.Description" />
+                                <ValidationMessage For="@(() => typeModel.Description)" />
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <InputCheckbox id="isIncome" class="form-check-input" @bind-Value="typeModel.IsIncome" />
+                                    <label class="form-check-label" for="isIncome">
+                                        This is an income type
+                                    </label>
+                                </div>
+                            </div>
+                        }
+                        else if (Model is OperationModel operationModel)
+                        {
+                            <div class="mb-3">
+                                <label for="type" class="form-label">Operation Type *</label>
+                                @if (OperationTypes == null || !OperationTypes.Any())
+                                {
+                                    <div class="alert alert-warning">No operation types found.</div>
+                                }
+                                else
+                                {
+                                    <InputSelect id="type" class="form-select" @bind-Value="operationModel.OperationTypeId">
+                                        <option value="">-- Select operation type --</option>
+                                        @foreach (var type in OperationTypes)
+                                        {
+                                            <option value="@type.OperationTypeId">@type.Name</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="@(() => operationModel.OperationTypeId)" />
+                                }
+                            </div>
+                            <div class="mb-3">
+                                <label for="date" class="form-label">Date *</label>
+                                <InputDate id="date" class="form-control" @bind-Value="operationModel.Date" />
+                                <ValidationMessage For="@(() => operationModel.Date)" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="amount" class="form-label">Amount *</label>
+                                <InputNumber id="amount" class="form-control" @bind-Value="operationModel.Amount" />
+                                <ValidationMessage For="@(() => operationModel.Amount)" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="note" class="form-label">Note</label>
+                                <InputTextArea id="note" class="form-control" rows="3" @bind-Value="operationModel.Note" />
+                                <ValidationMessage For="@(() => operationModel.Note)" />
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning">Unsupported model type.</div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="OnClose">Cancel</button>
+                        <button type="submit" class="btn btn-primary" disabled="@IsSubmitting">
+                            @if (IsSubmitting)
+                            {
+                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                <span>Saving...</span>
+                            }
+                            else
+                            {
+                                <span>@(IsEditing ? "Update" : "Create")</span>
+                            }
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    [Parameter] public string Title { get; set; } = "Edit";
+    [Parameter] public bool Visible { get; set; }
+    [Parameter] public bool IsEditing { get; set; }
+    [Parameter] public bool IsSubmitting { get; set; }
+    [Parameter] public object? Model { get; set; }
+    [Parameter] public List<OperationTypeModel> OperationTypes { get; set; } = new();
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback<EditContext> OnValidSubmit { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

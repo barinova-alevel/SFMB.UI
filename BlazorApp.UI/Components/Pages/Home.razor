@@ -1,0 +1,25 @@
+﻿@page "/"
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>SFMB</PageTitle>
+
+<h1>Self Finance Manager Blazor</h1>
+
+<div class="alert alert-info">
+    <p>Application of managing self finance with daily and date periodical report features.</p>
+    <p>Blazor Server UI with a .NET Core REST API backend.</p>
+    <div class="col-auto">
+        <button class="btn btn-primary" @onclick="NavigateToOperations">
+            <i class="bi bi-plus-circle"></i> Go to Operations
+        </button>
+    </div>
+</div>
+
+@code {
+    private void NavigateToOperations()
+    {
+        Navigation.NavigateTo("/operations");
+    }
+}
+

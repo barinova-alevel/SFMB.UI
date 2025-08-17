@@ -1,0 +1,136 @@
+﻿@page "/operation-types"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using BlazorApp.UI.Models
+@inject IHttpClientFactory HttpClientFactory
+@inject IJSRuntime JSRuntime
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h3>Operation Types Management</h3>
+            <p class="text-muted">Manage income and expense categories</p>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" @onclick="ShowCreateModal">
+                <i class="bi bi-plus-circle"></i> Add New Type
+            </button>
+        </div>
+    </div>
+
+    <CreateEditModal Title="Operation Type"
+                     Visible="@showModal"
+                     Model="currentOperationType"
+                     IsEditing="@isEditing"
+                     IsSubmitting="@isSubmitting"
+                     OnClose="@CloseModal"
+                     OnValidSubmit="@(async context => await OnValidSubmit(context))" />
+
+    <DeleteConfirmationModal Visible="showDeleteModal"
+                             Model="operationTypeToDelete"
+                             IsDeleting="isDeleting"
+                             CloseDeleteModal="CloseDeleteModal"
+                             ConfirmDelete="@(async () => await ConfirmDelete())" />
+
+    @if (isLoading)
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-arrow-clockwise spin"></i> Loading operation types...
+        </div>
+    }
+    else if (loadError)
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> Failed to load operation types. Please try again later.
+        </div>
+    }
+    else if (operationTypes?.Count == 0)
+    {
+        <div class="alert alert-warning">
+            <i class="bi bi-info-circle"></i> No operation types found. Create your first type to get started.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-arrow-up-circle"></i> Income Types</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (incomeTypes?.Any() == true)
+                        {
+                            <div class="list-group">
+                                @foreach (var type in incomeTypes)
+                                {
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">@type.Name</h6>
+                                            @if (!string.IsNullOrEmpty(type.Description))
+                                            {
+                                                <small class="text-muted">@type.Description</small>
+                                            }
+                                        </div>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => ShowEditModal(type)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowDeleteModal(type)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No income types defined</p>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0"><i class="bi bi-arrow-down-circle"></i> Expense Types</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (expenseTypes?.Any() == true)
+                        {
+                            <div class="list-group">
+                                @foreach (var type in expenseTypes)
+                                {
+                                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">@type.Name</h6>
+                                            @if (!string.IsNullOrEmpty(type.Description))
+                                            {
+                                                <small class="text-muted">@type.Description</small>
+                                            }
+                                        </div>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => ShowEditModal(type)">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowDeleteModal(type)">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No expense types defined</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+

@@ -1,0 +1,93 @@
+﻿@page "/operations"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using BlazorApp.UI.Models
+@inject IJSRuntime JSRuntime
+@inject IHttpClientFactory HttpClientFactory
+
+
+<div class="container-fluid">
+    <div class="row mb-3">
+        <div class="col">
+            <h3>Operations</h3>
+            <p class="text-muted">List of operations</p>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-primary" @onclick="ShowCreateModal">
+                <i class="bi bi-plus-circle"></i> Add New Operation
+            </button>
+        </div>
+    </div>
+
+    <CreateEditModal Visible="showModal"
+                     Model="currentOperation"
+                     IsEditing="isEditing"
+                     IsSubmitting="isSubmitting"
+                     OperationTypes="@OperationTypes"
+                     OnClose="CloseModal"
+                     OnValidSubmit="@(async context => await OnValidSubmit(context))" />
+
+    <DeleteConfirmationModal Visible="showDeleteModal"
+                             Model="operationToDelete"
+                             IsDeleting="isDeleting"
+                             CloseDeleteModal="CloseDeleteModal"
+                             ConfirmDelete="@(async () => await ConfirmDelete())" />
+
+    @if (isLoading)
+    {
+        <div class="alert alert-info">
+            <i class="bi bi-arrow-clockwise spin"></i>Loading operations...
+        </div>
+    }
+    else if (loadError)
+    {
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> Failed to load operations. Please try again later.
+        </div>
+    }
+    else if (operations?.Count == 0)
+    {
+        <div class="alert alert-warning">
+            <i class="bi bi-info-circle"></i> No operations found.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Category</th>
+                        <th>Note</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var op in operations)
+                    {
+                        <tr class="@(op.OperationTypeModel?.IsIncome == true ? "table-success" : "table-danger")">
+                            <td>@(op.Date?.ToShortDateString() ?? "")</td>
+                            <td class="@(op.OperationTypeModel?.IsIncome == true ? "text-success" : "text-danger")">
+                                <strong>@(op.OperationTypeModel?.IsIncome == true ? "+" : "-")@(op.Amount?.ToString("C") ?? "")</strong>
+                            </td>
+                            <td>@op.OperationTypeModel?.Name</td>
+                            <td>@op.Note</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => ShowEditModal(op)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowDeleteModal(op)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
