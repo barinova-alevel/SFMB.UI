@@ -7,7 +7,7 @@ namespace BlazorApp.UI.Models
         public int OperationId { get; set; }
 
         [Required(ErrorMessage = "Date is required")]
-        public DateTime? Date { get; set; }
+        public DateOnly? Date { get; set; }
 
         [Required(ErrorMessage = "Amount is required")]
         public decimal? Amount { get; set; }

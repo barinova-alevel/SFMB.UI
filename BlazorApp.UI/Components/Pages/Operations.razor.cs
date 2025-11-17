@@ -75,7 +75,7 @@ namespace BlazorApp.UI.Components.Pages
             isEditing = false;
             currentOperation = new OperationModel
             {
-                Date = DateTime.Today
+                Date = DateOnly.FromDateTime(DateTime.Today)
             };
             showModal = true;
         }

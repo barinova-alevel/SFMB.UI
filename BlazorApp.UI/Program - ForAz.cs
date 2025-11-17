@@ -11,7 +11,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddHttpClient("Api", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:51592/");
+    client.BaseAddress = new Uri("https://sfmbwebapi-dfb4hkgjeeh7cnbt.polandcentral-01.azurewebsites.net");
 });
 
 var app = builder.Build();
