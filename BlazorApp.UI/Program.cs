@@ -11,8 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. Environment Variable: ConnectionStrings__ApiBaseUrl 
 // 2. appsettings.json: "ConnectionStrings": { "ApiBaseUrl": "..." }
 // 
-var apiBaseUrl = builder.Configuration.GetConnectionString("ApiBaseUrl")
-                 ?? throw new InvalidOperationException("ApiBaseUrl is not configured.");
+
+var apiBaseUrl = builder.Configuration.GetValue<string>("API_URL") // <-- Read the environment variable directly
+                 ?? builder.Configuration.GetConnectionString("ApiBaseUrl") // <-- Optional fallback to appsettings
+                 ?? throw new InvalidOperationException("API_URL is not configured.");
+
+//var apiBaseUrl = builder.Configuration.GetConnectionString("ApiBaseUrl")
+//                 ?? throw new InvalidOperationException("ApiBaseUrl is not configured.");
 // --- END: API URL CONFIGURATION ---
 
 
