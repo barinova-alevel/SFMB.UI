@@ -1,5 +1,6 @@
 using System.Globalization;
 using BlazorApp.UI.Components;
+using Microsoft.AspNetCore.DataProtection;
 
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("uk-UA");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("uk-UA");
@@ -29,6 +30,10 @@ builder.Services.AddHttpClient("Api", client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/app/data/protection"))
+    .SetApplicationName("goldfish-app");
+
 
 var app = builder.Build();
 
@@ -41,7 +46,7 @@ if (!app.Environment.IsDevelopment())
 //app.UseStatusCodePagesWithRedirects("/");
 
 //uncomment after testing!!!
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
