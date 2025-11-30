@@ -38,10 +38,10 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseStatusCodePagesWithRedirects("/");
+//app.UseStatusCodePagesWithRedirects("/");
 
 //uncomment after testing!!!
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
