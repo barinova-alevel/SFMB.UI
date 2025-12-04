@@ -7,14 +7,8 @@ CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("uk-UA");
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- API URL CONFIGURATION: Read from Configuration ---
-// It will try to read from: 
-// 1. Environment Variable: ConnectionStrings__ApiBaseUrl 
-// 2. appsettings.json: "ConnectionStrings": { "ApiBaseUrl": "..." }
-// 
-
-var apiBaseUrl = builder.Configuration.GetValue<string>("API_URL") // <-- Read the environment variable directly
-                 ?? builder.Configuration.GetConnectionString("ApiBaseUrl") // <-- Optional fallback to appsettings
+var apiBaseUrl = builder.Configuration.GetValue<string>("API_URL") 
+                 ?? builder.Configuration.GetConnectionString("ApiBaseUrl") //optional fallback to appsettings
                  ?? throw new InvalidOperationException("API_URL is not configured.");
 
 //var apiBaseUrl = builder.Configuration.GetConnectionString("ApiBaseUrl")
@@ -34,6 +28,18 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo("/app/data/protection"))
     .SetApplicationName("goldfish-app");
 
+var blazorDomain = "https://sfmb-ui.https://goldfish-app-j6a9p.ondigitalocean.app/";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy",
+        policy =>
+        {
+            policy.WithOrigins(blazorDomain)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 
 var app = builder.Build();
 
@@ -47,7 +53,7 @@ if (!app.Environment.IsDevelopment())
 
 //uncomment after testing!!!
 //app.UseHttpsRedirection();
-
+app.UseCors("CorsPolicy");
 app.UseAntiforgery();
 
 app.MapStaticAssets();
