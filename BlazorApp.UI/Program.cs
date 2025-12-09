@@ -1,6 +1,9 @@
 using System.Globalization;
 using BlazorApp.UI.Components;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Components.Authorization;
+using BlazorApp.UI.Auth;
+using BlazorApp.UI.Auth.Services;
 
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("uk-UA");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("uk-UA");
@@ -19,6 +22,15 @@ var apiBaseUrl = builder.Configuration.GetValue<string>("API_URL")
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+// Add authentication and authorization services
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
+
+// Register custom authentication services
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
+
 builder.Services.AddHttpClient("Api", client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
@@ -28,6 +40,8 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo("/app/data/protection"))
     .SetApplicationName("goldfish-app");
 
+// NOTE: CORS domain URL may need to be corrected. The current URL has double 'https://' prefix.
+// Consider updating to: "https://goldfish-app-j6a9p.ondigitalocean.app/"
 var blazorDomain = "https://sfmb-ui.https://goldfish-app-j6a9p.ondigitalocean.app/";
 builder.Services.AddCors(options =>
 {
@@ -54,6 +68,8 @@ if (!app.Environment.IsDevelopment())
 //uncomment after testing!!!
 //app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
