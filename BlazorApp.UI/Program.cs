@@ -1,6 +1,9 @@
 using System.Globalization;
 using BlazorApp.UI.Components;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Components.Authorization;
+using BlazorApp.UI.Auth;
+using BlazorApp.UI.Auth.Services;
 
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("uk-UA");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("uk-UA");
@@ -18,6 +21,15 @@ var apiBaseUrl = builder.Configuration.GetValue<string>("API_URL")
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Add authentication and authorization services
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
+
+// Register custom authentication services
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 
 builder.Services.AddHttpClient("Api", client =>
 {
@@ -54,6 +66,8 @@ if (!app.Environment.IsDevelopment())
 //uncomment after testing!!!
 //app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 
 app.MapStaticAssets();

@@ -1,4 +1,9 @@
 ﻿@inherits LayoutComponentBase
+@using BlazorApp.UI.Auth.Services
+@using BlazorApp.UI.Auth
+@inject IAuthService AuthService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
 
 <div class="page">
     <div class="sidebar">
@@ -7,7 +12,23 @@
 
     <main>
         <div class="top-row px-4">
-            <a href="/" target="_blank">About</a>
+            <AuthorizeView>
+                <Authorized>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="text-muted">
+                            <i class="bi bi-person-circle"></i> @context.User.Identity?.Name
+                        </span>
+                        <button class="btn btn-sm btn-outline-danger" @onclick="HandleLogout">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="/login" class="btn btn-sm btn-primary">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
 
         <article class="content px-4 pb-5">
@@ -26,3 +47,17 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private async Task HandleLogout()
+    {
+        await AuthService.LogoutAsync();
+        
+        if (AuthStateProvider is CustomAuthenticationStateProvider customProvider)
+        {
+            customProvider.NotifyAuthenticationStateChanged();
+        }
+        
+        Navigation.NavigateTo("/login", true);
+    }
+}
