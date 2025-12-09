@@ -1,4 +1,5 @@
-using BlazorApp.UI.Auth.Services;
+using BlazorApp.UI.Auth.Models;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 
@@ -6,30 +7,39 @@ namespace BlazorApp.UI.Auth
 {
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
-        private readonly IAuthService _authService;
+        private readonly ProtectedSessionStorage _sessionStorage;
+        private const string UserSessionKey = "UserSession";
 
-        public CustomAuthenticationStateProvider(IAuthService authService)
+        public CustomAuthenticationStateProvider(ProtectedSessionStorage sessionStorage)
         {
-            _authService = authService;
+            _sessionStorage = sessionStorage;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var user = await _authService.GetCurrentUserAsync();
-
-            if (user != null)
+            try
             {
-                var claims = new[]
+                var result = await _sessionStorage.GetAsync<UserInfo>(UserSessionKey);
+                
+                if (result.Success && result.Value != null)
                 {
-                    new Claim(ClaimTypes.NameIdentifier, user.UserId),
-                    new Claim(ClaimTypes.Name, user.Name),
-                    new Claim(ClaimTypes.Email, user.Email)
-                };
+                    var user = result.Value;
+                    var claims = new[]
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, user.UserId),
+                        new Claim(ClaimTypes.Name, user.Name),
+                        new Claim(ClaimTypes.Email, user.Email)
+                    };
 
-                var identity = new ClaimsIdentity(claims, "custom");
-                var claimsPrincipal = new ClaimsPrincipal(identity);
+                    var identity = new ClaimsIdentity(claims, "custom");
+                    var claimsPrincipal = new ClaimsPrincipal(identity);
 
-                return new AuthenticationState(claimsPrincipal);
+                    return new AuthenticationState(claimsPrincipal);
+                }
+            }
+            catch
+            {
+                // Ignore errors and return anonymous state
             }
 
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));

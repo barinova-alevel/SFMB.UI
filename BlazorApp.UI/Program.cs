@@ -40,6 +40,8 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo("/app/data/protection"))
     .SetApplicationName("goldfish-app");
 
+// NOTE: CORS domain URL may need to be corrected. The current URL has double 'https://' prefix.
+// Consider updating to: "https://goldfish-app-j6a9p.ondigitalocean.app/"
 var blazorDomain = "https://sfmb-ui.https://goldfish-app-j6a9p.ondigitalocean.app/";
 builder.Services.AddCors(options =>
 {
