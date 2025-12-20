@@ -36,13 +36,37 @@ builder.Services.AddHttpClient("Api", client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("/app/data/protection"))
+//builder.Services.AddDataProtection()
+//    .PersistKeysToFileSystem(new DirectoryInfo("/app/data/protection"))
+//    .SetApplicationName("goldfish-app");
+var dataProtectionBuilder = builder.Services
+    .AddDataProtection()
     .SetApplicationName("goldfish-app");
+
+if (builder.Environment.IsProduction())
+{
+    // PROD (Docker / DigitalOcean)
+    dataProtectionBuilder.PersistKeysToFileSystem(
+        new DirectoryInfo("/app/data/protection"));
+}
+else
+{
+    // LOCAL / DEV
+    var localKeysPath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "goldfish-app",
+        "DataProtectionKeys");
+
+    dataProtectionBuilder.PersistKeysToFileSystem(
+        new DirectoryInfo(localKeysPath));
+}
+
+
 
 // NOTE: CORS domain URL may need to be corrected. The current URL has double 'https://' prefix.
 // Consider updating to: "https://goldfish-app-j6a9p.ondigitalocean.app/"
 var blazorDomain = "https://sfmb-ui.https://goldfish-app-j6a9p.ondigitalocean.app/";
+//var blazorDomain = "https://localhost:7132/";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy",
