@@ -266,3 +266,5 @@ FakesAssemblies/
 **/logs/
 
 # **/Properties/launchSettings.json
+/BlazorApp.UI/Program.cs
+/BlazorApp.UI/Program.cs
