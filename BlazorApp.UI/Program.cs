@@ -1,9 +1,10 @@
 using System.Globalization;
-using BlazorApp.UI.Components;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Components.Authorization;
 using BlazorApp.UI.Auth;
 using BlazorApp.UI.Auth.Services;
+using BlazorApp.UI.Components;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("uk-UA");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("uk-UA");
@@ -23,11 +24,25 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // Add authentication and authorization services
-builder.Services.AddAuthentication();
+//builder.Services.AddAuthentication("MyCookieAuth")
+//    .AddCookie("MyCookieAuth", options =>
+//    {
+//        options.LoginPath = "/login"; // Adjust to match your login route
+//    });
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "auth_cookie";
+        options.Cookie.MaxAge = TimeSpan.FromHours(24);
+        options.LoginPath = "/login";
+    });
+
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
 // Register custom authentication services
+builder.Services.AddScoped<AuthStore>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 
@@ -65,8 +80,8 @@ else
 
 // NOTE: CORS domain URL may need to be corrected. The current URL has double 'https://' prefix.
 // Consider updating to: "https://goldfish-app-j6a9p.ondigitalocean.app/"
-var blazorDomain = "https://sfmb-ui.https://goldfish-app-j6a9p.ondigitalocean.app/";
-//var blazorDomain = "https://localhost:7132/";
+//var blazorDomain = "https://sfmb-ui.https://goldfish-app-j6a9p.ondigitalocean.app/";
+var blazorDomain = "https://localhost:7132/";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("CorsPolicy",
@@ -78,7 +93,6 @@ builder.Services.AddCors(options =>
         });
 });
 
-
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -89,8 +103,7 @@ if (!app.Environment.IsDevelopment())
 
 //app.UseStatusCodePagesWithRedirects("/");
 
-//uncomment after testing!!!
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();

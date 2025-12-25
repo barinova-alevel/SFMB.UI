@@ -1,53 +1,71 @@
-using BlazorApp.UI.Auth.Models;
-using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
-using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
+using System.Security.Principal;
+using System.Text.Encodings.Web;
+using BlazorApp.UI.Auth.Models;
+using BlazorApp.UI.Auth.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.Extensions.Options;
+
+public class AuthStore
+{
+    public event Action<UserInfo?>? UserChanged;
+    private UserInfo? currentUser;
+    public UserInfo? CurrentUser
+    {
+        get { return currentUser; }
+        set
+        {
+            currentUser = value;
+
+            if (UserChanged is not null)
+            {
+                UserChanged(currentUser);
+            }
+        }
+    }
+}
 
 namespace BlazorApp.UI.Auth
 {
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
-        private readonly ProtectedSessionStorage _sessionStorage;
-        private const string UserSessionKey = "UserSession";
+        private AuthenticationState authenticationState;
 
-        public CustomAuthenticationStateProvider(ProtectedSessionStorage sessionStorage)
+        public CustomAuthenticationStateProvider(AuthStore service)
         {
-            _sessionStorage = sessionStorage;
+            authenticationState = new AuthenticationState(Create(service.CurrentUser));
+
+            service.UserChanged += (newUser) =>
+            {
+                var principal = Create(newUser);
+                authenticationState = new AuthenticationState(principal);
+
+                NotifyAuthenticationStateChanged(Task.FromResult(authenticationState));
+            };
         }
 
-        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+        private ClaimsPrincipal Create(UserInfo? user)
         {
-            try
+            if (user == null)
             {
-                var result = await _sessionStorage.GetAsync<UserInfo>(UserSessionKey);
-                
-                if (result.Success && result.Value != null)
-                {
-                    var user = result.Value;
-                    var claims = new[]
-                    {
+                return new ClaimsPrincipal();
+            }
+
+            var claims = new[]
+                        {
                         new Claim(ClaimTypes.NameIdentifier, user.UserId),
                         new Claim(ClaimTypes.Name, user.Name),
                         new Claim(ClaimTypes.Email, user.Email)
                     };
 
-                    var identity = new ClaimsIdentity(claims, "custom");
-                    var claimsPrincipal = new ClaimsPrincipal(identity);
-
-                    return new AuthenticationState(claimsPrincipal);
-                }
-            }
-            catch
-            {
-                // Ignore errors and return anonymous state
-            }
-
-            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            var identity = new ClaimsIdentity(claims, "custom");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+            return claimsPrincipal;
         }
 
-        public void NotifyAuthenticationStateChanged()
-        {
-            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-        }
+        public override Task<AuthenticationState> GetAuthenticationStateAsync() =>
+            Task.FromResult(authenticationState);
     }
 }
