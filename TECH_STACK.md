@@ -267,7 +267,7 @@ SFMB.UI/
 ### Optimization Features
 1. **Server-side Rendering**: Reduced client-side processing
 2. **Static Asset Mapping**: Efficient asset delivery
-3. **Minimal JavaScript**: Blazor WebAssembly JavaScript only
+3. **Minimal JavaScript**: Only Blazor Server framework JavaScript required (no custom JavaScript needed)
 4. **Component Scoping**: Isolated component styles
 5. **SignalR**: Efficient real-time communication
 
