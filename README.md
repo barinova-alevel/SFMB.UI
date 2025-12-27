@@ -31,6 +31,8 @@ For detailed information about the authentication implementation, see [AUTHENTIC
 - **Hosting**: DigitalOcean
 - **Authentication**: ASP.NET Core Identity with session-based authentication
 
+For a comprehensive overview of all technologies, frameworks, and tools used in this project, see [TECH_STACK.md](TECH_STACK.md).
+
 ## Getting Started
 
 ### Prerequisites
