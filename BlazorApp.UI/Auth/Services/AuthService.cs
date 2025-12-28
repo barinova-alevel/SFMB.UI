@@ -1,6 +1,5 @@
-using System.Net.Http.Json;
-using System.Security.Claims;
 using BlazorApp.UI.Auth.Models;
+using System.Net.Http.Json;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace BlazorApp.UI.Auth.Services
@@ -8,17 +7,17 @@ namespace BlazorApp.UI.Auth.Services
     public class AuthService : IAuthService
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly AuthStore _authStore;
+        private readonly ProtectedSessionStorage _sessionStorage;
         private readonly ILogger<AuthService> _logger;
         private const string UserSessionKey = "UserSession";
 
         public AuthService(
             IHttpClientFactory httpClientFactory,
-            AuthStore authStore,
+            ProtectedSessionStorage sessionStorage,
             ILogger<AuthService> logger)
         {
             _httpClientFactory = httpClientFactory;
-            _authStore = authStore;
+            _sessionStorage = sessionStorage;
             _logger = logger;
         }
 
@@ -31,16 +30,11 @@ namespace BlazorApp.UI.Auth.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var user = await response.Content.ReadFromJsonAsync<UserInfo>();
-
-                    if (user != null)
+                    var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
+                    if (authResponse?.Success == true && authResponse.User != null)
                     {
-                        _authStore.CurrentUser = user;
-                        return new()
-                        {
-                            Success = true,
-                            User = user
-                        };
+                        await _sessionStorage.SetAsync(UserSessionKey, authResponse.User);
+                        return authResponse;
                     }
                 }
 
@@ -74,7 +68,7 @@ namespace BlazorApp.UI.Auth.Services
                     var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
                     if (authResponse?.Success == true && authResponse.User != null)
                     {
-                        //await _authStore.SetAsync(UserSessionKey, authResponse.User);
+                        await _sessionStorage.SetAsync(UserSessionKey, authResponse.User);
                         return authResponse;
                     }
                 }
@@ -133,13 +127,20 @@ namespace BlazorApp.UI.Auth.Services
 
         public async Task LogoutAsync()
         {
-            _authStore.CurrentUser = null;
-            await Task.CompletedTask;
+            await _sessionStorage.DeleteAsync(UserSessionKey);
         }
 
-        public Task<UserInfo?> GetCurrentUserAsync()
+        public async Task<UserInfo?> GetCurrentUserAsync()
         {
-            return Task.FromResult(_authStore.CurrentUser);
+            try
+            {
+                var result = await _sessionStorage.GetAsync<UserInfo>(UserSessionKey);
+                return result.Success ? result.Value : null;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

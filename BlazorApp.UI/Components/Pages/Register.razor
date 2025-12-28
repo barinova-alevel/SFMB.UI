@@ -128,6 +128,12 @@
 
             if (response.Success)
             {
+                // Notify authentication state changed
+                if (AuthStateProvider is CustomAuthenticationStateProvider customProvider)
+                {
+                    customProvider.NotifyAuthenticationStateChanged();
+                }
+
                 // Redirect to home page
                 Navigation.NavigateTo("/", true);
             }

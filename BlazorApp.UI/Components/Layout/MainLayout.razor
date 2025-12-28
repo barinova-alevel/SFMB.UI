@@ -52,6 +52,12 @@
     private async Task HandleLogout()
     {
         await AuthService.LogoutAsync();
+        
+        if (AuthStateProvider is CustomAuthenticationStateProvider customProvider)
+        {
+            customProvider.NotifyAuthenticationStateChanged();
+        }
+        
         Navigation.NavigateTo("/login", true);
     }
 }
