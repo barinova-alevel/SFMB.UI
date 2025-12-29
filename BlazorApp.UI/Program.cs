@@ -1,9 +1,12 @@
 using System.Globalization;
-using BlazorApp.UI.Components;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.Components.Authorization;
 using BlazorApp.UI.Auth;
+using BlazorApp.UI.Auth.Models;
 using BlazorApp.UI.Auth.Services;
+using BlazorApp.UI.Components;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.AspNetCore.DataProtection;
 
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("uk-UA");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("uk-UA");
@@ -23,18 +26,27 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 // Add authentication and authorization services
-builder.Services.AddAuthentication();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.Name = "auth_cookie";
+        options.Cookie.MaxAge = TimeSpan.FromHours(24);
+        options.LoginPath = "/login";
+    });
+
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
 // Register custom authentication services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
-
+builder.Services.AddCircuitServicesAccessor();
+builder.Services.AddScoped<TokenProviderMessageHandler>();
 builder.Services.AddHttpClient("Api", client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
-});
+     
+}).ConfigurePrimaryHttpMessageHandler<TokenProviderMessageHandler>();
 
 //builder.Services.AddDataProtection()
 //    .PersistKeysToFileSystem(new DirectoryInfo("/app/data/protection"))

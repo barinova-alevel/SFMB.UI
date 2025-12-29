@@ -1,9 +1,69 @@
-using BlazorApp.UI.Auth.Models;
 using System.Net.Http.Json;
+using BlazorApp.UI.Auth.Models;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 namespace BlazorApp.UI.Auth.Services
 {
+    public class CircuitServicesAccessor
+    {
+        static readonly AsyncLocal<IServiceProvider> blazorServices = new();
+
+        public IServiceProvider? Services
+        {
+            get => blazorServices.Value;
+            set => blazorServices.Value = value!;
+        }
+    }
+
+    public class ServicesAccessorCircuitHandler(
+        IServiceProvider services, CircuitServicesAccessor servicesAccessor)
+        : CircuitHandler
+    {
+        public override Func<CircuitInboundActivityContext, Task> CreateInboundActivityHandler(
+            Func<CircuitInboundActivityContext, Task> next) =>
+                async context =>
+                {
+                    servicesAccessor.Services = services;
+                    await next(context);
+                    servicesAccessor.Services = null;
+                };
+    }
+
+    public static class CircuitServicesServiceCollectionExtensions
+    {
+        public static IServiceCollection AddCircuitServicesAccessor(
+            this IServiceCollection services)
+        {
+            services.AddScoped<CircuitServicesAccessor>();
+            services.AddScoped<CircuitHandler, ServicesAccessorCircuitHandler>();
+
+            return services;
+        }
+    }
+    public class TokenProviderMessageHandler : DelegatingHandler
+    {
+        private readonly CircuitServicesAccessor _serviceProvider;
+        private const string UserSessionKey = "UserSession";
+        public TokenProviderMessageHandler(CircuitServicesAccessor serviceProvider) : base(new HttpClientHandler())
+        {
+            _serviceProvider = serviceProvider;
+        }
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var result = await _serviceProvider.Services.GetRequiredService<ProtectedSessionStorage>().GetAsync<UserInfo>(UserSessionKey);
+            if (result.Success && result.Value != null)
+            {
+                var user = result.Value;
+                if (!string.IsNullOrEmpty(user.Token))
+                {
+                    request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", user.Token);
+                }
+            }
+            return await base.SendAsync(request, cancellationToken);
+        }
+    }
+
     public class AuthService : IAuthService
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -30,11 +90,11 @@ namespace BlazorApp.UI.Auth.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
-                    if (authResponse?.Success == true && authResponse.User != null)
+                    var authResponse = await response.Content.ReadFromJsonAsync<UserInfo>();
+                    if (authResponse != null)
                     {
-                        await _sessionStorage.SetAsync(UserSessionKey, authResponse.User);
-                        return authResponse;
+                        await _sessionStorage.SetAsync(UserSessionKey, authResponse);
+                        return new AuthResponse { User = authResponse, Success = true };
                     }
                 }
 
