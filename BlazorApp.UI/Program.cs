@@ -8,11 +8,16 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.DataProtection;
 
+Console.Title = $"UI - {DateTime.Now:HH:mm}";
 CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("uk-UA");
 CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo("uk-UA");
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Logging.AddSimpleConsole(options =>
+{
+    options.TimestampFormat = "[HH:mm:ss] ";
+    options.UseUtcTimestamp = false;
+});
 var apiBaseUrl = builder.Configuration.GetValue<string>("API_URL") 
                  ?? builder.Configuration.GetConnectionString("ApiBaseUrl") //optional fallback to appsettings
                  ?? throw new InvalidOperationException("API_URL is not configured.");
