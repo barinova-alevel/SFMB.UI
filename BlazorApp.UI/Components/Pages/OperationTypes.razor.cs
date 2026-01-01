@@ -31,8 +31,7 @@ namespace BlazorApp.UI.Components.Pages
             if (firstRender && !hasRendered)
             {
                 hasRendered = true;
-                var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                await JSRuntime.InvokeVoidAsync("console.log", $"[{timestamp}] OperationTypes page initialized");
+                await JSRuntime.InvokeVoidAsync("console.log", LogHelper.GetTimestampedMessage("OperationTypes page initialized"));
             }
         }
 

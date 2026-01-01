@@ -26,8 +26,7 @@ namespace BlazorApp.UI.Components.Pages
             if (firstRender && !hasRendered)
             {
                 hasRendered = true;
-                var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                await JSRuntime.InvokeVoidAsync("console.log", $"[{timestamp}] PeriodReport page initialized");
+                await JSRuntime.InvokeVoidAsync("console.log", LogHelper.GetTimestampedMessage("PeriodReport page initialized"));
             }
         }
 
@@ -70,8 +69,7 @@ namespace BlazorApp.UI.Components.Pages
                         };
                         filteredOperations = report.Operations;
                     }
-                    var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                    await JSRuntime.InvokeVoidAsync("console.log", $"[{timestamp}] Report generated for period: {reportRequest.StartDate:yyyy-MM-dd} to {reportRequest.EndDate:yyyy-MM-dd}");
+                    await JSRuntime.InvokeVoidAsync("console.log", LogHelper.GetTimestampedMessage($"Report generated for period: {reportRequest.StartDate:yyyy-MM-dd} to {reportRequest.EndDate:yyyy-MM-dd}"));
                 }
                 else
                 {
@@ -82,8 +80,7 @@ namespace BlazorApp.UI.Components.Pages
             catch (Exception ex)
             {
                 errorMessage = $"Error generating report: {ex.Message}";
-                var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                await JSRuntime.InvokeVoidAsync("console.error", $"[{timestamp}] Error generating report:", ex);
+                await JSRuntime.InvokeVoidAsync("console.error", LogHelper.GetTimestampedMessage("Error generating report:"), ex);
             }
             finally
             {

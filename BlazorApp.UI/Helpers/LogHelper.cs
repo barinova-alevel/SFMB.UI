@@ -13,5 +13,11 @@ namespace BlazorApp.UI.Helpers
             var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
             Console.WriteLine($"[{timestamp}] ERROR: {message}");
         }
+
+        public static string GetTimestampedMessage(string message)
+        {
+            var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            return $"[{timestamp}] {message}";
+        }
     }
 }
