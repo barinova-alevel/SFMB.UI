@@ -2,6 +2,7 @@
 using System.Net.Http;
 using BlazorApp.UI.Dtos;
 using BlazorApp.UI.Models;
+using BlazorApp.UI.Helpers;
 using Microsoft.JSInterop;
 
 namespace BlazorApp.UI.Components.Pages
@@ -32,7 +33,8 @@ namespace BlazorApp.UI.Components.Pages
             if (firstRender && !hasRendered)
             {
                 hasRendered = true;
-                await JSRuntime.InvokeVoidAsync("console.log", "Daily Report page initialized");
+                var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                await JSRuntime.InvokeVoidAsync("console.log", $"[{timestamp}] Daily Report page initialized");
             }
         }
 
@@ -45,8 +47,8 @@ namespace BlazorApp.UI.Components.Pages
 
                 var client = HttpClientFactory.CreateClient("Api");
                 var response = await client.GetAsync($"api/dailyreport/report/daily?Date={reportRequest.Date:yyyy-MM-dd}");
-                Console.WriteLine($" Date {reportRequest.Date:yyyy-MM-dd}");
-                Console.WriteLine(response.ToString());
+                LogHelper.Log($"Date {reportRequest.Date:yyyy-MM-dd}");
+                LogHelper.Log(response.ToString());
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -76,7 +78,8 @@ namespace BlazorApp.UI.Components.Pages
                         };
                         filteredOperations = report.Operations;
                     }
-                    await JSRuntime.InvokeVoidAsync("console.log", $"Report generated for {reportRequest.Date:yyyy-MM-dd}");
+                    var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                    await JSRuntime.InvokeVoidAsync("console.log", $"[{timestamp}] Report generated for {reportRequest.Date:yyyy-MM-dd}");
                 }
                 else
                 {
@@ -87,7 +90,8 @@ namespace BlazorApp.UI.Components.Pages
             catch (Exception ex)
             {
                 errorMessage = $"Error generating report: {ex.Message}";
-                await JSRuntime.InvokeVoidAsync("console.error", "Error generating report:", ex);
+                var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                await JSRuntime.InvokeVoidAsync("console.error", $"[{timestamp}] Error generating report:", ex);
             }
             finally
             {

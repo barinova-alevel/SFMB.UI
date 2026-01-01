@@ -1,4 +1,5 @@
 ﻿using BlazorApp.UI.Models;
+using BlazorApp.UI.Helpers;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 
@@ -30,7 +31,8 @@ namespace BlazorApp.UI.Components.Pages
             if (firstRender && !hasRendered)
             {
                 hasRendered = true;
-                await JSRuntime.InvokeVoidAsync("console.log", "OperationTypes page initialized");
+                var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                await JSRuntime.InvokeVoidAsync("console.log", $"[{timestamp}] OperationTypes page initialized");
             }
         }
 
@@ -50,7 +52,7 @@ namespace BlazorApp.UI.Components.Pages
             catch (Exception ex)
             {
                 loadError = true;
-                Console.WriteLine($"Failed to load operation types: {ex.Message}");
+                LogHelper.LogError($"Failed to load operation types: {ex.Message}");
             }
             finally
             {
