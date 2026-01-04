@@ -1,4 +1,3 @@
-using System.Net.Http.Json;
 using BlazorApp.UI.Auth.Models;
 using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
@@ -125,11 +124,11 @@ namespace BlazorApp.UI.Auth.Services
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
-                    if (authResponse?.Success == true && authResponse.User != null)
+                    var authResponse = await response.Content.ReadFromJsonAsync<UserInfo>();
+                    if (authResponse != null)
                     {
-                        await _sessionStorage.SetAsync(UserSessionKey, authResponse.User);
-                        return authResponse;
+                        await _sessionStorage.SetAsync(UserSessionKey, authResponse);
+                        return new AuthResponse { User = authResponse, Success = true};
                     }
                 }
 
