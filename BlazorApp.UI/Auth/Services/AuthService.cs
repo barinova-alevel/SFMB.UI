@@ -128,6 +128,7 @@ namespace BlazorApp.UI.Auth.Services
                     if (authResponse != null)
                     {
                         await _sessionStorage.SetAsync(UserSessionKey, authResponse);
+                        _logger.LogInformation("User registered");
                         return new AuthResponse { User = authResponse, Success = true};
                     }
                 }
@@ -187,6 +188,7 @@ namespace BlazorApp.UI.Auth.Services
         public async Task LogoutAsync()
         {
             await _sessionStorage.DeleteAsync(UserSessionKey);
+            _logger.LogInformation("Logout");
         }
 
         public async Task<UserInfo?> GetCurrentUserAsync()

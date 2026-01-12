@@ -1,8 +1,6 @@
-﻿using System.Net;
-using BlazorApp.UI.Models;
+﻿using BlazorApp.UI.Models;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
-using static System.Net.WebRequestMethods;
 
 namespace BlazorApp.UI.Components.Pages
 {
@@ -26,9 +24,19 @@ namespace BlazorApp.UI.Components.Pages
         protected override async Task OnInitializedAsync()
         {
             await LoadOperations();
-            var client = HttpClientFactory.CreateClient("Api");
-            var operationTypes = await client.GetFromJsonAsync<List<OperationTypeModel>>("api/operationtypes");
-            OperationTypes = operationTypes ?? new List<OperationTypeModel>();
+
+            try
+            {
+                var client = HttpClientFactory.CreateClient("Api");
+                var operationTypes = await client.GetFromJsonAsync<List<OperationTypeModel>>("api/operationtypes");
+                OperationTypes = operationTypes ?? new List<OperationTypeModel>();
+            }
+            catch (Exception ex)
+            {
+                // Don't let errors fetching operation types crash the component render.
+                Console.WriteLine($"Failed to load operation types: {ex.Message}");
+                                OperationTypes = new List<OperationTypeModel>();
+            }
 
             foreach (var op in operations)
             {

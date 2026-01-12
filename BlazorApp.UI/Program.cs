@@ -106,7 +106,6 @@ if (!app.Environment.IsDevelopment())
 
 //app.UseStatusCodePagesWithRedirects("/");
 
-//uncomment after testing!!!
 //app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
 app.UseAuthentication();
