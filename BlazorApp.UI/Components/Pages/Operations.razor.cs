@@ -23,25 +23,17 @@ namespace BlazorApp.UI.Components.Pages
 
         protected override async Task OnInitializedAsync()
         {
-            await LoadOperations();
-
             try
             {
                 var client = HttpClientFactory.CreateClient("Api");
-                var operationTypes = await client.GetFromJsonAsync<List<OperationTypeModel>>("api/operationtypes");
-                OperationTypes = operationTypes ?? new List<OperationTypeModel>();
+                OperationTypes = await client.GetFromJsonAsync<List<OperationTypeModel>>("api/operationtypes") ?? new();
             }
             catch (Exception ex)
             {
-                // Don't let errors fetching operation types crash the component render.
-                Console.WriteLine($"Failed to load operation types: {ex.Message}");
-                                OperationTypes = new List<OperationTypeModel>();
+                Console.WriteLine($"Error: {ex.Message}");
+                OperationTypes = new();
             }
-
-            foreach (var op in operations)
-            {
-                op.OperationTypeModel = OperationTypes.FirstOrDefault(t => t.OperationTypeId == op.OperationTypeId);
-            }
+            await LoadOperations();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -62,19 +54,21 @@ namespace BlazorApp.UI.Components.Pages
 
                 var client = HttpClientFactory.CreateClient("Api");
                 operations = await client.GetFromJsonAsync<List<OperationModel>>("api/operations") ?? new();
+
+                if (operations.Any() && OperationTypes != null && OperationTypes.Any())
+                {
+                    MapOperationTypes();
+                }
             }
             catch (Exception ex)
             {
                 loadError = true;
+                operations = new List<OperationModel>();
                 Console.WriteLine($"Failed to load operations: {ex.Message}");
             }
             finally
             {
                 isLoading = false;
-            }
-            foreach (var op in operations)
-            {
-                op.OperationTypeModel = OperationTypes.FirstOrDefault(t => t.OperationTypeId == op.OperationTypeId);
             }
         }
 
@@ -168,6 +162,15 @@ namespace BlazorApp.UI.Components.Pages
             }
         }
 
+        private void MapOperationTypes()
+        {
+            if (operations == null || OperationTypes == null) return;
+
+            foreach (var op in operations)
+            {
+                op.OperationTypeModel = OperationTypes.FirstOrDefault(t => t.OperationTypeId == op.OperationTypeId);
+            }
+        }
         private async Task ConfirmDelete()
         {
             if (operationToDelete == null) return;
