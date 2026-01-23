@@ -4,6 +4,44 @@
 
 The SFMB.UI project follows a **layered architecture pattern** to ensure separation of concerns, maintainability, and testability. The architecture is organized into four distinct layers, each with specific responsibilities.
 
+## Architecture Diagram
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Presentation Layer                        │
+│  (Components, Pages, Layout - User Interface)               │
+│  - Operations.razor, OperationTypes.razor                   │
+│  - Login.razor, Register.razor                              │
+│  - MainLayout.razor, NavMenu.razor                          │
+└────────────────────┬────────────────────────────────────────┘
+                     │ Depends on (Injects Services)
+                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Application Layer                         │
+│  (Services, Business Logic)                                 │
+│  - IOperationService / OperationService                     │
+│  - IOperationTypeService / OperationTypeService             │
+└────────────────────┬────────────────────────────────────────┘
+                     │ Uses Models & DTOs
+                     ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      Domain Layer                            │
+│  (Core Business Models)                                     │
+│  - OperationModel, OperationTypeModel                       │
+│  - DailyReportModel, PeriodReportModel                      │
+└─────────────────────────────────────────────────────────────┘
+                     ▲
+                     │ Used by
+                     │
+┌─────────────────────────────────────────────────────────────┐
+│                  Infrastructure Layer                        │
+│  (External Services, Auth, DTOs)                            │
+│  - Auth (IAuthService, CustomAuthenticationStateProvider)   │
+│  - DTOs (OperationDtoBlazor, etc.)                          │
+│  - API Clients (Future)                                     │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ## Architecture Layers
 
 ### 1. Presentation Layer (`Presentation/`)
@@ -225,3 +263,15 @@ BlazorApp.UI/
 3. Add mapping layer (e.g., AutoMapper) between DTOs and Models
 4. Introduce domain events for cross-cutting concerns
 5. Add unit tests for each layer
+
+## Known Technical Debt
+
+While the architecture follows layered principles, there are a few areas identified for future improvement:
+
+1. **Report Models**: `DailyReportModel` and `PeriodReportModel` in the Domain layer currently reference Infrastructure DTOs, which violates pure domain principles. These are being used as view models and should be moved to `Presentation/ViewModels` in a future refactoring.
+
+2. **Report Services**: The `DailyReport` and `PeriodReport` pages currently use `HttpClientFactory` directly. These should be refactored to use dedicated report services (e.g., `IReportService`) in the Application layer.
+
+3. **Request DTOs**: `PeriodReportRequest` is currently in the Pages namespace. Consider moving to a ViewModels folder in the Presentation layer.
+
+These items represent technical debt that should be addressed in future iterations while maintaining the existing functionality.
