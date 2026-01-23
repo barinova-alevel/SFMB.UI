@@ -68,22 +68,38 @@ See [AUTHENTICATION_GUIDE.md](AUTHENTICATION_GUIDE.md) for detailed API requirem
 
 ## Project Structure
 
+The project follows a **layered architecture pattern** for better separation of concerns, maintainability, and testability. For detailed information about the architecture, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ```
 SFMB.UI/
 ├── BlazorApp.UI/
-│   ├── Auth/                    # Authentication infrastructure
-│   │   ├── Models/              # Auth models (Login, Register, etc.)
-│   │   └── Services/            # Auth service implementations
-│   ├── Components/
-│   │   ├── Pages/               # Razor pages (Login, Register, Operations, etc.)
-│   │   ├── Layout/              # Layout components
-│   │   └── Components/          # Reusable components
-│   ├── Dtos/                    # Data transfer objects
-│   ├── Models/                  # Domain models
-│   └── Program.cs               # Application startup
-├── AUTHENTICATION_GUIDE.md      # Detailed authentication documentation
-└── README.md                    # This file
+│   ├── Application/              # Application services and business logic
+│   │   ├── Interfaces/           # Service interfaces
+│   │   └── Services/             # Service implementations
+│   ├── Domain/                   # Core business models
+│   │   └── Models/               # Domain entities
+│   ├── Infrastructure/           # External services and infrastructure
+│   │   ├── Auth/                 # Authentication infrastructure
+│   │   ├── Dtos/                 # Data transfer objects
+│   │   └── ApiClients/           # API client implementations
+│   ├── Presentation/             # UI layer
+│   │   ├── Components/           # Reusable UI components
+│   │   ├── Layout/               # Layout components
+│   │   └── Pages/                # Razor pages
+│   └── Program.cs                # Application startup
+├── ARCHITECTURE.md               # Detailed architecture documentation
+├── AUTHENTICATION_GUIDE.md       # Detailed authentication documentation
+└── README.md                     # This file
 ```
+
+### Architecture Layers
+
+1. **Presentation Layer**: User interface components and pages
+2. **Application Layer**: Business logic and service orchestration
+3. **Domain Layer**: Core business entities and models
+4. **Infrastructure Layer**: External services, authentication, and DTOs
+
+For more details on the architecture, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Usage
 
