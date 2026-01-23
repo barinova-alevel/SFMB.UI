@@ -9,7 +9,10 @@ namespace BlazorApp.UI.Auth.Models
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Password is required")]
-        [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
+        //[MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Password must be at least 6 characters")]
+        [RegularExpression(@"^(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{6,}$",
+        ErrorMessage = "Password must contain at least one uppercase letter, one number, and one special symbol.")]
         public string Password { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Confirm password is required")]

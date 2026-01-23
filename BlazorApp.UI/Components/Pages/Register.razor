@@ -38,7 +38,7 @@
                                 <span class="input-group-text">
                                     <i class="bi bi-person"></i>
                                 </span>
-                                <InputText id="name" class="form-control" @bind-Value="registerRequest.Name" 
+                                <InputText id="name" class="form-control" @bind-Value="registerRequest.Name"
                                            placeholder="Enter your name" disabled="@isSubmitting" />
                             </div>
                             <ValidationMessage For="@(() => registerRequest.Name)" />
@@ -50,7 +50,7 @@
                                 <span class="input-group-text">
                                     <i class="bi bi-envelope"></i>
                                 </span>
-                                <InputText id="email" class="form-control" @bind-Value="registerRequest.Email" 
+                                <InputText id="email" class="form-control" @bind-Value="registerRequest.Email"
                                            placeholder="Enter your email" disabled="@isSubmitting" />
                             </div>
                             <ValidationMessage For="@(() => registerRequest.Email)" />
@@ -62,8 +62,8 @@
                                 <span class="input-group-text">
                                     <i class="bi bi-key-fill"></i>
                                 </span>
-                                <InputText id="password" type="password" class="form-control" 
-                                           @bind-Value="registerRequest.Password" 
+                                <InputText id="password" type="password" class="form-control"
+                                           @bind-Value="registerRequest.Password"
                                            placeholder="Enter your password" disabled="@isSubmitting" />
                             </div>
                             <ValidationMessage For="@(() => registerRequest.Password)" />
@@ -75,9 +75,12 @@
                                 <span class="input-group-text">
                                     <i class="bi bi-key-fill"></i>
                                 </span>
-                                <InputText id="confirmPassword" type="password" class="form-control" 
-                                           @bind-Value="registerRequest.ConfirmPassword" 
+                                <InputText id="confirmPassword" type="password" class="form-control"
+                                           @bind-Value="registerRequest.ConfirmPassword"
                                            placeholder="Confirm your password" disabled="@isSubmitting" />
+                            </div>
+                            <div class="form-text text-muted" style="font-size: 0.8rem;">
+                                Must be 6+ characters with at least one uppercase, one number, and one symbol.
                             </div>
                             <ValidationMessage For="@(() => registerRequest.ConfirmPassword)" />
                         </div>
