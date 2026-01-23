@@ -1,8 +1,10 @@
 using System.Globalization;
-using BlazorApp.UI.Auth;
-using BlazorApp.UI.Auth.Models;
-using BlazorApp.UI.Auth.Services;
-using BlazorApp.UI.Components;
+using BlazorApp.UI.Application.Interfaces;
+using BlazorApp.UI.Application.Services;
+using BlazorApp.UI.Infrastructure.Auth;
+using BlazorApp.UI.Infrastructure.Auth.Models;
+using BlazorApp.UI.Infrastructure.Auth.Services;
+using BlazorApp.UI.Presentation.Components;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
@@ -47,6 +49,11 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
 builder.Services.AddCircuitServicesAccessor();
 builder.Services.AddScoped<TokenProviderMessageHandler>();
+
+// Register application services
+builder.Services.AddScoped<IOperationService, OperationService>();
+builder.Services.AddScoped<IOperationTypeService, OperationTypeService>();
+
 builder.Services.AddHttpClient("Api", client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);

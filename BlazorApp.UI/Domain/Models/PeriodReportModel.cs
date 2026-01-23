@@ -1,0 +1,13 @@
+﻿using BlazorApp.UI.Infrastructure.Dtos;
+
+namespace BlazorApp.UI.Domain.Models
+{
+    public class PeriodReportModel
+    {
+        public DateOnly StartDate { get; set; }
+        public DateOnly EndDate { get; set; }
+        public decimal TotalIncome { get; set; }
+        public decimal TotalExpenses { get; set; }
+        public List<OperationDtoBlazor> Operations { get; set; } = new();
+    }
+}
