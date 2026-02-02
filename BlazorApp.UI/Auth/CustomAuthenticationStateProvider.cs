@@ -45,7 +45,7 @@ namespace BlazorApp.UI.Auth
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
-        public void NotifyAuthenticationStateChanged()
+        public virtual void NotifyAuthenticationStateChanged()
         {
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
