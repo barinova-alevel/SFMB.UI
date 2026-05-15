@@ -97,16 +97,36 @@ namespace BlazorApp.UI.Auth.Services
                     }
                 }
 
-                var errorContent = await response.Content.ReadAsStringAsync();
+                if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+                {
+                    _logger.LogWarning("Login failed: database unavailable (503). User: {Email}", request.Email);
+                    return new AuthResponse
+                    {
+                        Success = false,
+                        Message = "The service is temporarily unavailable. Please try again later."
+                    };
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
+                {
+                    _logger.LogWarning("Login failed: server error (500), database may be unavailable. User: {Email}", request.Email);
+                    return new AuthResponse
+                    {
+                        Success = false,
+                        Message = "The service is temporarily unavailable. Please try again later."
+                    };
+                }
+
+                _logger.LogWarning("Login failed with status {StatusCode}. User: {Email}", (int)response.StatusCode, request.Email);
                 return new AuthResponse
                 {
                     Success = false,
-                    Message = $"Login failed: {errorContent}"
+                    Message = "Login failed. Please check your credentials and try again."
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during login");
+                _logger.LogError(ex, "Unexpected error during login. User: {Email}", request.Email);
                 return new AuthResponse
                 {
                     Success = false,
@@ -128,21 +148,41 @@ namespace BlazorApp.UI.Auth.Services
                     if (authResponse != null)
                     {
                         await _sessionStorage.SetAsync(UserSessionKey, authResponse);
-                        _logger.LogInformation("User registered");
-                        return new AuthResponse { User = authResponse, Success = true};
+                        _logger.LogInformation("User registered successfully. User: {Email}", request.Email);
+                        return new AuthResponse { User = authResponse, Success = true };
                     }
                 }
 
-                var errorContent = await response.Content.ReadAsStringAsync();
+                if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
+                {
+                    _logger.LogWarning("Registration failed: database unavailable (503). User: {Email}", request.Email);
+                    return new AuthResponse
+                    {
+                        Success = false,
+                        Message = "The service is temporarily unavailable. Please try again later."
+                    };
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
+                {
+                    _logger.LogWarning("Registration failed: server error (500), database may be unavailable. User: {Email}", request.Email);
+                    return new AuthResponse
+                    {
+                        Success = false,
+                        Message = "The service is temporarily unavailable. Please try again later."
+                    };
+                }
+
+                _logger.LogWarning("Registration failed with status {StatusCode}. User: {Email}", (int)response.StatusCode, request.Email);
                 return new AuthResponse
                 {
                     Success = false,
-                    Message = $"Registration failed: {errorContent}"
+                    Message = "Registration failed. The email may already be in use."
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during registration");
+                _logger.LogError(ex, "Unexpected error during registration. User: {Email}", request.Email);
                 return new AuthResponse
                 {
                     Success = false,
