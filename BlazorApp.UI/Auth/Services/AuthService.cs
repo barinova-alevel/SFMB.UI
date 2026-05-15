@@ -107,6 +107,16 @@ namespace BlazorApp.UI.Auth.Services
                     };
                 }
 
+                if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
+                {
+                    _logger.LogWarning("Login failed: server error (500), database may be unavailable. User: {Email}", request.Email);
+                    return new AuthResponse
+                    {
+                        Success = false,
+                        Message = "The service is temporarily unavailable. Please try again later."
+                    };
+                }
+
                 _logger.LogWarning("Login failed with status {StatusCode}. User: {Email}", (int)response.StatusCode, request.Email);
                 return new AuthResponse
                 {
@@ -146,6 +156,16 @@ namespace BlazorApp.UI.Auth.Services
                 if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
                 {
                     _logger.LogWarning("Registration failed: database unavailable (503). User: {Email}", request.Email);
+                    return new AuthResponse
+                    {
+                        Success = false,
+                        Message = "The service is temporarily unavailable. Please try again later."
+                    };
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
+                {
+                    _logger.LogWarning("Registration failed: server error (500), database may be unavailable. User: {Email}", request.Email);
                     return new AuthResponse
                     {
                         Success = false,
