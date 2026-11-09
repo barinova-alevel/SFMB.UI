@@ -135,6 +135,12 @@ namespace BlazorApp.UI.Auth.Services
             }
         }
 
+        public Task<DemoCredentials?> GetDemoCredentialsAsync()
+        {
+            var client = _httpClientFactory.CreateClient("Api");
+            return DemoCredentialsClient.GetAsync(client);
+        }
+
         public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
         {
             try

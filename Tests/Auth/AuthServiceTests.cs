@@ -407,6 +407,67 @@ namespace Tests.Auth
         }
 
         #endregion
+
+        #region Demo credentials
+
+        [Fact]
+        public async Task GetDemoCredentials_WithEmailAndPassword_ShouldReturnTrimmedCredentials()
+        {
+            var handler = new MockHttpMessageHandler();
+            handler.SetResponse(HttpStatusCode.OK, "{\"email\":\" demo@goldfish.app \",\"password\":\" secret1 \"}");
+            var client = new HttpClient(handler) { BaseAddress = new Uri("http://test.local/") };
+
+            var result = await DemoCredentialsClient.GetAsync(client);
+
+            result.Should().NotBeNull();
+            result!.Email.Should().Be("demo@goldfish.app");
+            result.Password.Should().Be("secret1");
+            handler.LastRequestUri.Should().Be(new Uri("http://test.local/api/auth/demo"));
+        }
+
+        [Fact]
+        public async Task GetDemoCredentials_WhenRequestFails_ShouldReturnNull()
+        {
+            var handler = new MockHttpMessageHandler();
+            handler.SetResponse(HttpStatusCode.NotFound, string.Empty);
+            var client = new HttpClient(handler) { BaseAddress = new Uri("http://test.local/") };
+
+            var result = await DemoCredentialsClient.GetAsync(client);
+
+            result.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetDemoCredentials_WhenPasswordIsMissing_ShouldReturnNull()
+        {
+            var handler = new MockHttpMessageHandler();
+            handler.SetResponse(HttpStatusCode.OK, "{\"Email\":\"demo@goldfish.app\"}");
+            var client = new HttpClient(handler) { BaseAddress = new Uri("http://test.local/") };
+
+            var result = await DemoCredentialsClient.GetAsync(client);
+
+            result.Should().BeNull();
+        }
+
+        [Fact]
+        public async Task GetDemoCredentials_WhenRequestThrows_ShouldReturnNull()
+        {
+            var client = new HttpClient(new ThrowingHttpMessageHandler()) { BaseAddress = new Uri("http://test.local/") };
+
+            var result = await DemoCredentialsClient.GetAsync(client);
+
+            result.Should().BeNull();
+        }
+
+        private sealed class ThrowingHttpMessageHandler : HttpMessageHandler
+        {
+            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            {
+                throw new HttpRequestException("Network error");
+            }
+        }
+
+        #endregion
     }
 
     // Helper class to mock HTTP responses
@@ -414,6 +475,7 @@ namespace Tests.Auth
     {
         private HttpStatusCode _statusCode = HttpStatusCode.OK;
         private object? _responseContent;
+        public Uri? LastRequestUri { get; private set; }
 
         public void SetResponse(HttpStatusCode statusCode, object? content)
         {
@@ -425,6 +487,7 @@ namespace Tests.Auth
             HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
+            LastRequestUri = request.RequestUri;
             var response = new HttpResponseMessage(_statusCode);
 
             if (_responseContent != null)
@@ -561,6 +624,12 @@ namespace Tests.Auth
                     Message = "An error occurred during login. Please try again."
                 };
             }
+        }
+
+        public Task<DemoCredentials?> GetDemoCredentialsAsync()
+        {
+            var client = _httpClientFactory.CreateClient("Api");
+            return DemoCredentialsClient.GetAsync(client);
         }
 
         public async Task<AuthResponse> RegisterAsync(RegisterRequest request)

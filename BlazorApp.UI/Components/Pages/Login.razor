@@ -8,6 +8,7 @@
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
+@inject TimeProvider Time
 
 <PageTitle>Login - SFMB</PageTitle>
 
@@ -28,6 +29,14 @@
                         </div>
                     }
 
+                    <div class="mb-4">
+                        <button type="button" id="login-demo" class="btn btn-outline-primary w-100 fw-semibold text-nowrap px-2"
+                                disabled="@FieldsLocked" @onclick="HandleDemoLogin">
+                            <i class="bi bi-stars" aria-hidden="true"></i> Login with demo user
+                        </button>
+                        <p class="text-center text-muted small fw-medium mt-2 mb-0">No account needed</p>
+                    </div>
+
                     <EditForm Model="loginRequest" OnValidSubmit="HandleLogin" FormName="LoginForm">
                         <DataAnnotationsValidator />
                         <ValidationSummary class="text-danger" />
@@ -39,7 +48,7 @@
                                     <i class="bi bi-envelope"></i>
                                 </span>
                                 <InputText id="email" class="form-control" @bind-Value="loginRequest.Email" 
-                                           placeholder="Enter your email" disabled="@isSubmitting" />
+                                           placeholder="Enter your email" disabled="@FieldsLocked" />
                             </div>
                             <ValidationMessage For="@(() => loginRequest.Email)" />
                         </div>
@@ -52,13 +61,18 @@
                                 </span>
                                 <InputText id="password" type="password" class="form-control" 
                                            @bind-Value="loginRequest.Password" 
-                                           placeholder="Enter your password" disabled="@isSubmitting" />
+                                           placeholder="Enter your password" disabled="@FieldsLocked" />
                             </div>
                             <ValidationMessage For="@(() => loginRequest.Password)" />
                         </div>
 
+                        @if (!string.IsNullOrEmpty(demoStatus))
+                        {
+                            <p id="login-demo-status" role="status" class="text-center text-muted small mb-3">@demoStatus</p>
+                        }
+
                         <div class="d-grid gap-2 mb-3">
-                            <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                            <button type="submit" class="btn btn-primary" disabled="@FieldsLocked">
                                 @if (isSubmitting)
                                 {
                                     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
@@ -96,7 +110,48 @@
 @code {
     private LoginRequest loginRequest = new();
     private bool isSubmitting = false;
+    private bool isDemoPending = false;
+    private bool demoLock = false;
     private string errorMessage = string.Empty;
+    private string demoStatus = string.Empty;
+
+    private bool FieldsLocked => isSubmitting || isDemoPending;
+
+    private async Task HandleDemoLogin()
+    {
+        if (demoLock || isSubmitting)
+        {
+            return;
+        }
+
+        demoLock = true;
+        isDemoPending = true;
+        errorMessage = string.Empty;
+        demoStatus = string.Empty;
+
+        try
+        {
+            var credentials = await AuthService.GetDemoCredentialsAsync();
+            if (credentials is null)
+            {
+                errorMessage = DemoLogin.NotConfiguredMessage;
+                return;
+            }
+
+            loginRequest.Email = credentials.Email;
+            loginRequest.Password = credentials.Password;
+            demoStatus = DemoLogin.CredentialsLoadedStatus;
+            StateHasChanged();
+
+            await Task.Delay(TimeSpan.FromMilliseconds(DemoLogin.DelayMilliseconds), Time);
+            await HandleLogin();
+        }
+        finally
+        {
+            demoLock = false;
+            isDemoPending = false;
+        }
+    }
 
     private async Task HandleLogin()
     {
