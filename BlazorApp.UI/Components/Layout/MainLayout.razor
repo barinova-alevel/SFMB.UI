@@ -12,11 +12,25 @@
 
     <main>
         <div class="top-row px-4">
+            <nav class="project-links" aria-label="Project links">
+                <a href="https://goldfish-ui.vercel.app"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="btn btn-sm btn-outline-primary">
+                    View React UI
+                </a>
+                <a href="https://github.com/barinova-alevel/SFMB.UI"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="btn btn-sm btn-outline-primary">
+                    View on GitHub
+                </a>
+            </nav>
             <AuthorizeView>
                 <Authorized>
                     <div class="d-flex align-items-center gap-3">
                         <span class="text-muted">
-                            <i class="bi bi-person-circle"></i> @context.User.Identity?.Name
+                            <i class="bi bi-person-circle"></i> @(context.User.Identity?.Name)
                         </span>
                         <button class="btn btn-sm btn-outline-danger" @onclick="HandleLogout">
                             <i class="bi bi-box-arrow-right"></i> Logout
